@@ -5,6 +5,7 @@ import re
 import marshal
 
 class Store:
+  """The data store"""
 
   index  = {}
   kindex = {}
@@ -33,7 +34,7 @@ class Store:
         self.index[w][d] = self.index[w].get(d) or set()
         self.index[w][d].add(i)
         i += 1
-        for tri in self.trigrams(w):
+        for tri in self.bigrams(w):
           self.kindex[tri] = self.kindex.get(tri) or set()
           self.kindex[tri].add(w)
     # save indices
@@ -73,7 +74,7 @@ class Store:
   def load_kindex(self):
     """Loads kgram index into memory"""
     index_file = open(self.kindex_name)
-    index = marshal.load(index_file)
+    self.kindex = marshal.load(index_file)
     index_file.close()
 
 
@@ -86,16 +87,16 @@ class Store:
     return documents
 
 
-  def trigrams(self, term):
-    """Generate all possible trigrams for term"""
+  def bigrams(self, term):
+    """Generate all possible bigrams for term"""
     k = 2
     i = 0
-    trigrams = ["$" + term[0:k-1]]
+    bigrams = ["$" + term[0:k-1]]
     while i < len(term) - (k - 1):
-      trigrams.append(term[i:i+k])
+      bigrams.append(term[i:i+k])
       i += 1
-    trigrams.append(term[-(k-1):] + "$")
-    return trigrams
+    bigrams.append(term[-(k-1):] + "$")
+    return bigrams
 
 
   def tokenize(self, filename):
