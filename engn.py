@@ -1,10 +1,4 @@
 #!/usr/bin/python
-  # """
-  # iterate over query terms, decide what type of term is it and add it to a
-  # list of that type's terms, process each type and return an interesected
-  # set. All intersected sets from the 3 types of queries are then intersected
-  # to return the result to main()
-  # """
 
 class Engine:
   """The search engine"""
