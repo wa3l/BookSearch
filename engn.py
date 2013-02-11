@@ -31,7 +31,7 @@ class Engine:
   def get_boolean_answers(self, answers):
     """Get boolean answers and append them to the overall list of answers"""
     if self.query["bool"]:
-      boolean = self.boolean_search(query["bool"])
+      boolean = self.boolean_search(self.query["bool"])
       if boolean: answers.append(boolean)
     return answers
 

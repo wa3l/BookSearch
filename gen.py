@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
-import os
-import re
-import marshal
+import os, re, gzip, marshal
 
 class Store:
   """The data store"""
@@ -18,6 +16,7 @@ class Store:
     if self.indices_present():
       self.load_indices()
     else:
+      print "\n> Writing indices! This only happens once, please wait ..."
       self.generate_indices(dir)
 
 
@@ -60,7 +59,10 @@ class Store:
 
   def load_indices(self):
     """Loads indices into memory"""
-    if not self.index:  self.load_index()
+    if not self.index or not self.kindex:
+      print "\n> Reading indices! This happens once per session, please wait ..."
+    if not self.index:
+      self.load_index()
     if not self.kindex: self.load_kindex()
 
 
@@ -102,7 +104,6 @@ class Store:
   def tokenize(self, filename):
     """Read document and return its tokens/terms"""
     f = open(filename, 'rU')
-    # terms = re.sub(r"[^\w\s]*[_]*", " ", f.read().lower())
-    terms = re.sub(r"[^\w\s]", " ", f.read().lower())
+    terms = re.sub(r'[_]|[^\w\s]', ' ', f.read().lower())
     return terms.split()
 
