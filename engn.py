@@ -94,6 +94,18 @@ class Engine:
     return self.positional_search(docs, terms)
 
 
+  def wildcard_terms(self, bigrams):
+    """Given a list of bigrams, return union of their terms"""
+    terms = set()
+    for tri in bigrams:
+      inter = set()
+      if tri in self.store.kindex:
+        inter = self.store.kindex[tri]
+      if not terms: terms = inter.copy()
+      terms = terms & inter
+    if terms: return terms
+
+
   def process_wildcard(self, cards):
     """Generate a wildcard's bigrams"""
     middle = len(cards) == 3
@@ -106,18 +118,6 @@ class Engine:
     else:
       bigrams.extend(self.bigrams(cards[0], 'start'))
     return bigrams
-
-
-  def wildcard_terms(self, bigrams):
-    """Given a list of bigrams, return union of their terms"""
-    terms = set()
-    for tri in bigrams:
-      inter = set()
-      if tri in self.store.kindex:
-        inter = self.store.kindex[tri]
-      if not terms: terms = inter.copy()
-      terms = terms & inter
-    if terms: return terms
 
 
   def bigrams(self, term, pos):

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, re, gzip, marshal
+import os, re, gzip, marshal, timer
 
 class Store:
   """The data store"""
@@ -12,31 +12,31 @@ class Store:
 
 
   def __init__(self, dir):
-    """Generate index, store index and kgram index"""
+    """Build index, store index and kgram index"""
     if self.indices_present():
       self.load_indices()
     else:
       print "\n> Writing indices! This only happens once, please wait ..."
-      self.generate_indices(dir)
+      self.build_indices(dir)
 
 
-  def generate_indices(self, dir):
-    """Generate positional and kgram indices"""
+  def build_indices(self, dir):
+    """Build positional and kgram indices"""
     documents = self.get_documents(dir)
-    # generate indices
     for d in documents:
       terms = self.tokenize(documents[d])
       i = 0
-      while i < len(terms):
-        w = terms[i]
-        self.index[w]    = self.index.get(w) or {}
-        self.index[w][d] = self.index[w].get(d) or set()
+      for w in terms:
+        if w not in self.index: self.index[w] = {}
+        if d not in self.index[w]: self.index[w][d] = set()
         self.index[w][d].add(i)
         i += 1
-        for tri in self.bigrams(w):
-          self.kindex[tri] = self.kindex.get(tri) or set()
-          self.kindex[tri].add(w)
-    # save indices
+
+    for w in self.index.keys():
+      for tri in self.bigrams(w):
+        if tri not in self.kindex: self.kindex[tri] = set()
+        self.kindex[tri].add(w)
+
     self.save_indices()
 
 
@@ -75,7 +75,7 @@ class Store:
 
   def load_kindex(self):
     """Loads kgram index into memory"""
-    index_file = open(self.kindex_name)
+    index_file  = open(self.kindex_name)
     self.kindex = marshal.load(index_file)
     index_file.close()
 
@@ -90,7 +90,7 @@ class Store:
 
 
   def bigrams(self, term):
-    """Generate all possible bigrams for term"""
+    """Build all possible bigrams for term"""
     k = 2
     i = 0
     bigrams = ["$" + term[0:k-1]]
@@ -105,5 +105,6 @@ class Store:
     """Read document and return its tokens/terms"""
     f = open(filename, 'rU')
     terms = re.sub(r'[_]|[^\w\s]', ' ', f.read().lower())
+    f.close()
     return terms.split()
 

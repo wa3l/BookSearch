@@ -10,7 +10,7 @@ class Prompt(cmd.Cmd):
   engine = None
   store  = None
   prompt = "\nquery> "
-  welcome = "\nWelcome to Wael's search engine!\nPlease type your query to perform a search.\nType '?' for help and 'exit' to terminate"
+  welcome = "\n### Welcome to Wael's search engine!\n### Enter your query to perform a search.\n### Enter '?' for help and 'exit' to terminate."
 
 
   def preloop(self):
@@ -28,13 +28,15 @@ class Prompt(cmd.Cmd):
     # search for query
     with timer.Timer() as t:
       answers = self.engine.search(query)
-    print('\n> Search took %.06f sec.' % t.interval)
+
     if answers:
       print("\n> Found %d search results:" % len(answers), end=' ')
       for doc in answers: print(doc, end=' ')
       print()
     else:
-      print("\n> Sorry, your search for: (%s) did not yield any answers :(" % line)
+      print("\n> Sorry, your search for: (%s) did not yield any results :(" % line)
+
+    print('\n> Search took %.06f sec.' % t.interval)
 
 
   def parse_query(self, line):
@@ -69,14 +71,14 @@ class Prompt(cmd.Cmd):
 
 
   def parse_boolean(self, query, line):
-    """ consider whatever left as boolean query terms"""
+    """ consider whatever is left as boolean query terms"""
     query['bool'] = line.split()
     return (query, line)
 
 
   def emptyline(self):
     """Called when user doesn't enter anything"""
-    print("\nEnter your search query or type '?' for help")
+    print("\n> Enter your search query or type '?' for help.")
 
 
   def do_exit(slef, line):
