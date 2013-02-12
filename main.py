@@ -25,7 +25,6 @@ class Prompt(cmd.Cmd):
     """Handle search query"""
     query = self.parse_query(line)
     if not self.engine: self.engine = engn.Engine(self.store)
-    # search for query
     with timer.Timer() as t:
       answers = self.engine.search(query)
 
