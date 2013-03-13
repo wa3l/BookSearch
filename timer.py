@@ -1,3 +1,12 @@
+#!/usr/bin/python
+
+"""
+Book Search
+Module: timer
+Author: Wael Al-Sallami
+Date: 2/10/2013
+"""
+
 import time
 
 class Timer:

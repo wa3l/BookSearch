@@ -1,5 +1,12 @@
 #!/usr/bin/python
 
+"""
+Book Search
+Module: gen
+Author: Wael Al-Sallami
+Date: 2/10/2013
+"""
+
 import os, re, gzip, marshal, timer
 
 class Store:
@@ -7,8 +14,9 @@ class Store:
 
   index  = {}
   kindex = {}
-  index_name   = "index.dat"
-  kindex_name  = "kindex.dat"
+  kgrams_length = 2
+  index_name    = "index.dat"
+  kindex_name   = "kindex.dat"
 
 
   def __init__(self, dir):
@@ -22,22 +30,51 @@ class Store:
 
   def build_indices(self, dir):
     """Build positional and kgram indices"""
-    documents = self.get_documents(dir)
-    for d in documents:
-      terms = self.tokenize(documents[d])
+    doc_terms = self.get_doc_terms(dir)
+    self.build_index(doc_terms)
+    self.build_kindex()
+    self.save_indices()
+
+
+  def build_index(self, doc_terms):
+    """Build the positional index based on documents"""
+    for d in doc_terms:
       i = 0
-      for w in terms:
-        if w not in self.index: self.index[w] = {}
-        if d not in self.index[w]: self.index[w][d] = set()
-        self.index[w][d].add(i)
+      for t in doc_terms[d]:
+        if t not in self.index: self.index[t] = {}
+        if d not in self.index[t]: self.index[t][d] = set()
+        self.index[t][d].add(i)
         i += 1
 
-    for w in self.index.keys():
-      for tri in self.bigrams(w):
-        if tri not in self.kindex: self.kindex[tri] = set()
-        self.kindex[tri].add(w)
 
-    self.save_indices()
+  def build_kindex(self):
+    """Build the k-gram index based on terms"""
+    for w in self.index.keys():
+      for g in self.kgrams(w):
+        if g not in self.kindex: self.kindex[g] = set()
+        self.kindex[g].add(w)
+
+
+  def load_indices(self):
+    """Loads indices into memory"""
+    if not self.index or not self.kindex:
+      print "\n> Reading indices! This happens once per session, please wait ..."
+    if not self.index:  self.load_index()
+    if not self.kindex: self.load_kindex()
+
+
+  def load_index(self):
+    """Loads positional index into memory"""
+    index_file = open(self.index_name)
+    self.index = marshal.load(index_file)
+    index_file.close()
+
+
+  def load_kindex(self):
+    """Loads kgram index into memory"""
+    index_file  = open(self.kindex_name)
+    self.kindex = marshal.load(index_file)
+    index_file.close()
 
 
   def save_indices(self):
@@ -57,48 +94,23 @@ class Store:
       return True
 
 
-  def load_indices(self):
-    """Loads indices into memory"""
-    if not self.index or not self.kindex:
-      print "\n> Reading indices! This happens once per session, please wait ..."
-    if not self.index:
-      self.load_index()
-    if not self.kindex: self.load_kindex()
-
-
-  def load_index(self):
-    """Loads positional index into memory"""
-    index_file = open(self.index_name)
-    self.index = marshal.load(index_file)
-    index_file.close()
-
-
-  def load_kindex(self):
-    """Loads kgram index into memory"""
-    index_file  = open(self.kindex_name)
-    self.kindex = marshal.load(index_file)
-    index_file.close()
-
-
-  def get_documents(self, dir):
+  def get_doc_terms(self, dir):
     """Search for txt files only, return dict of {doc-name: doc-path}"""
     names = [name for name in os.listdir(dir) if name.endswith(".txt")]
-    documents = {}
+    doc_terms = {}
     for name in names:
-      documents[name.split(".")[0]] = os.path.join(dir, name)
-    return documents
+      doc_terms[name.split(".")[0]] = self.tokenize(os.path.join(dir, name))
+    return doc_terms
 
 
-  def bigrams(self, term):
-    """Build all possible bigrams for term"""
-    k = 2
-    i = 0
-    bigrams = ["$" + term[0:k-1]]
-    while i < len(term) - (k - 1):
-      bigrams.append(term[i:i+k])
-      i += 1
-    bigrams.append(term[-(k-1):] + "$")
-    return bigrams
+  def kgrams(self, term):
+    """Build all possible kgrams for term"""
+    k = self.kgrams_length
+    kgrams = ["$" + term[0:k-1]]
+    for i in range(len(term) - (k-1)):
+      kgrams.append(term[i:i+k])
+    kgrams.append(term[-(k-1):] + "$")
+    return kgrams
 
 
   def tokenize(self, filename):

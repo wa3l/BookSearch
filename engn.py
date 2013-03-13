@@ -1,5 +1,12 @@
 #!/usr/bin/python
 
+"""
+Book Search
+Module: engn
+Author: Wael Al-Sallami
+Date: 2/10/2013
+"""
+
 class Engine:
   """The search engine"""
 
@@ -108,7 +115,7 @@ class Engine:
 
   def process_wildcard(self, cards):
     """Generate a wildcard's bigrams"""
-    middle = len(cards) == 3
+    middle = (len(cards) == 3)
     bigrams = []
     if cards[0] == '*':
       bigrams.extend(self.bigrams(cards[1], 'end'))
