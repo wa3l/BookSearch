@@ -1,5 +1,4 @@
 ## BookSearch - A simple positional/kgram based Search Engine.
-#### Author: Wael Al-Sallami
 
 ### Usage
 1. To run the program and get an interactive interface, type:
@@ -22,3 +21,11 @@ After indices are written to disk, you can type your query and get results back.
 On subsequent runs, indices are going to be read from disk instead of being built each time. The total ~52MB takes about 3 seconds to be loaded into memory using `marshal`.
 
 User input is cleaned up from special characters, lower-cased, and finally parsed for Boolean, Phrase, and Wildcard queries. Any combination of query types is accepted.
+
+Author
+------
+Wael Al-Sallami | [wa3l.com](http://wa3l.com).
+  
+License
+-----
+Public domain: [http://unlicense.org](http://unlicense.org)
