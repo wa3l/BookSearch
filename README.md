@@ -1,5 +1,5 @@
 ## BookSearch - A simple positional/kgram based Search Engine.
-**Author: wael Al-Sallami**   
+**Author: Wael Al-Sallami**   
 **Date: Feb 11, 2013**   
 
 ### Usage
