@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Book Search
+BookSearch
 Module: gen
 Author: Wael Al-Sallami
 Date: 2/10/2013

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Book Search
+BookSearch
 Module: engn
 Author: Wael Al-Sallami
 Date: 2/10/2013
@@ -49,8 +49,8 @@ class Engine:
     """perform wildcard search given a list of wildcards"""
     terms = []
     for q in self.query['wild']:
-      bigrams = self.process_wildcard(q)
-      subset  = self.wildcard_terms(bigrams)
+      kgrams = self.process_wildcard(q)
+      subset = self.wildcard_terms(kgrams)
       if subset: terms.append(subset)
 
     for card in terms:
@@ -67,7 +67,7 @@ class Engine:
     """Perform a boolean search given a list of terms"""
     terms_docs = []
     for term in query:
-      if term not in self.store.index: return None
+      if term not in self.store.index: return
       docs = set()
       for doc in self.store.index[term].keys():
         docs.add(doc)
@@ -81,15 +81,12 @@ class Engine:
     for doc in docs:
       base_pos = self.store.index[terms[0]][doc]
       for pos in base_pos:
-        i = 1
         found = True
-        while i < len(terms):
-          if pos + i not in self.store.index[terms[i]][doc]:
+        for i in range(1, len(terms)):
+          if (pos + i) not in self.store.index[terms[i]][doc]:
             found = False
             break
-          i += 1
-        if found:
-          answers.add(doc)
+        if found: answers.add(doc)
     return answers
 
 
@@ -97,45 +94,47 @@ class Engine:
     """Perform a phrase search"""
     terms = query.split()
     docs = self.boolean_search(terms)
-    if docs is None: return
-    return self.positional_search(docs, terms)
+    if docs:
+      return self.positional_search(docs, terms)
 
 
-  def wildcard_terms(self, bigrams):
-    """Given a list of bigrams, return union of their terms"""
+  def wildcard_terms(self, kgrams):
+    """Given a list of kgrams, return union of their terms"""
     terms = set()
-    for tri in bigrams:
+    for g in kgrams:
       inter = set()
-      if tri in self.store.kindex:
-        inter = self.store.kindex[tri]
+      if g in self.store.kindex:
+        inter = self.store.kindex[g]
       if not terms: terms = inter.copy()
-      terms = terms & inter
-    if terms: return terms
+      terms &= inter
+    return terms
 
 
   def process_wildcard(self, cards):
-    """Generate a wildcard's bigrams"""
+    """Generate a wildcard's kgrams"""
     middle = (len(cards) == 3)
-    bigrams = []
+    kgrams = []
     if cards[0] == '*':
-      bigrams.extend(self.bigrams(cards[1], 'end'))
+      kgrams.extend(self.kgrams(cards[1], 'end'))
     elif cards[1] == '*' and middle:
-      bigrams.extend(self.bigrams(cards[0], 'start'))
-      bigrams.extend(self.bigrams(cards[2], 'end'))
+      kgrams.extend(self.kgrams(cards[0], 'start'))
+      kgrams.extend(self.kgrams(cards[2], 'end'))
     else:
-      bigrams.extend(self.bigrams(cards[0], 'start'))
-    return bigrams
+      kgrams.extend(self.kgrams(cards[0], 'start'))
+    return kgrams
 
 
-  def bigrams(self, term, pos):
-    """Generate bigrams for wildcard subset"""
-    k = 2
-    bigrams = []
-    if pos == 'start': bigrams.append("$" + term[0:k-1])
-    i = 0
-    while i < len(term) - (k - 1):
-      bigrams.append(term[i:i+k])
-      i += 1
-    if pos == 'end': bigrams.append(term[-(k-1):] + "$")
-    return [t for t in bigrams if len(t) == k]
+  def kgrams(self, term, pos):
+    """Generate kgrams for wildcard subset"""
+    k = self.store.kgrams_length
+    kgrams = []
+    if pos == 'start':
+      kgrams.append("$" + term[0:k-1])
+
+    for i in range(len(term) - (k-1)):
+      kgrams.append(term[i:i+k])
+
+    if pos == 'end':
+      kgrams.append(term[-(k-1):] + "$")
+    return [t for t in kgrams if len(t) == k]
 
