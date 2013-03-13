@@ -4,7 +4,7 @@
 1. To run the program and get an interactive interface, type:
 > ./main.py
 
-2. Place the /books directory where main.py is.
+2. Place the /books directory where main.py is. To download the corpus click [here](http://courses.cse.tamu.edu/caverlee/csce670/hw/books.zip).
 
 3. To search for something, type your query into the command-line:
 > quixo* "mark twain"
